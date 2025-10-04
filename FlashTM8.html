@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Live BTC Trades</title>
+<style>
+body { font-family: Arial, sans-serif; background: #111; color: #0f0; padding: 10px; }
+h2 { color: #ff0; }
+.trade { margin-bottom: 5px; padding: 5px; border-bottom: 1px solid #333; }
+</style>
+</head>
+<body>
+<h2>Live BTC/USDT Trades (Binance)</h2>
+<div id="trades"></div>
+
+<script>
+const ws = new WebSocket('wss://stream.binance.com:9443/ws/btcusdt@trade');
+const tradesDiv = document.getElementById('trades');
+
+ws.onmessage = (event) => {
+    const data = JSON.parse(event.data);
+    // p = price, q = quantity, T = trade time (ms)
+    const price = parseFloat(data.p).toFixed(2);
+    const qty = parseFloat(data.q).toFixed(6);
+    const time = new Date(data.T).toLocaleTimeString();
+
+    const div = document.createElement('div');
+    div.className = 'trade';
+    div.textContent = `${time} | Price: $${price} | Volume: ${qty} BTC`;
+    
+    tradesDiv.prepend(div);
+    
+    // Keep only latest 50 trades
+    if(tradesDiv.childNodes.length > 50){
+        tradesDiv.removeChild(tradesDiv.lastChild);
+    }
+};
+</script>
+</body>
+</html>
